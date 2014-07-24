@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}<title>AIDEN Dice - Provably Fair | #aiden on Freenode</title>{% end %}
+
+{% block head_scripts_styles %}
+<script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+<style>
+.profit {color:#43ac6a;font-weight:bold; font-size:1.2em;text-align:right;}
+.loss {color:#f04124;font-weight:bold; font-size:1.2em;text-align:right;}
+.rollResult {font-weight:bold; font-size:1.2em;}
+.generalInfo {color:#000000;font-weight:bold; font-size:1.1em;}
+iframe[id^='twitter-widget-']{ width:100%;}
+</style>
+{% end %}
+
+{% block content %}
+<div class="row">
+  <div class="large-8 medium-8 columns">
+    <h5>Let&rsquo;s Play!</h5>
+    <form id="betForm" data-abide>
+    {% module xsrf_form_html() %}
+    <input id="gameType" type="hidden" value="" />
+      <div class="row">
+        <div class="large-6 medium-6 columns">
+          <label>Bet Amount</label>
+          <input id="betFormBetAmount" type="number" data-bind="value: betAmount, valueUpdate: ['afterKeyDown', 'input'], hasFocus: betAmountEditing" placeholder="0.00000000" step="any" min="0" />
+        </div>
+        <div style="vertical-align: bottom;" class="large-6 medium-6 columns">
+          <label>Options</label>
+          <a href="#" data-bind="click: doubleBetAmount" class="tiny radius button">x2</a> <a href="#" data-bind="click: halfBetAmount" class="tiny radius button">/2</a> <a href="#" data-bind="click: minBetAmount" class="tiny radius button">MIN</a> <a href="#" data-bind="click: maxBetAmount" class="tiny radius button">MAX</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <div class="row collapse">
+            <label>Profit</label>
+            <div class="large-6 medium-6 columns">
+              <input type="number" data-bind="value: profit" placeholder="0.00000000" step="any" min="0" readonly />
+            </div>
+            <div class="large-6 medium-6 columns">
+              <span class="postfix">Max <span data-bind="text: maxBetLimit"></span> ADN profit per bet</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <div class="row collapse">
+            <label>Payout</label>
+            <div class="large-6 medium-6 columns">
+              <input type="number" data-bind="value: payout, valueUpdate: ['afterKeyDown', 'input'], hasFocus: payoutEditing" placeholder="2" step="any" min="0" />
+            </div>
+            <div class="large-6 medium-6 columns">
+              <span class="postfix">Max: 100.0000, Min: 1.0001</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <div class="row collapse">
+            <label>Win Chance</label>
+            <div class="large-6 medium-6 columns">
+              <input id="betFormWinChance" type="number" data-bind="value: winChance, valueUpdate: ['afterKeyDown', 'input'], hasFocus: winChanceEditing" placeholder="49.5" step="any" min="0" />
+            </div>
+            <div class="large-6 medium-6 columns">
+              <span class="postfix">Max: 97.99, Min: 0.98</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <input id="rollUnder" type="submit" class="medium radius button" data-bind="value: underText">&nbsp;<input id="rollOver" type="submit" class="medium radius button" data-bind="value: overText">
+          <div id="betResultStatus" data-alert class="radius alert-box rollResult" style="display: none;"></div>
+        </div>
+      </div>
+    </form>
+    <div class="row">
+        <div class="large-12 medium-12 columns" id="twitter">
+        <a class="twitter-timeline"  href="https://twitter.com/Supercryptdotco"  data-widget-id="452118450047942656">Tweets by @Supercryptdotco</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </div>
+    </div>
+  </div>
+  <div class="large-4 medium-4 columns">
+    <div id="generalInfo" class="alert-box info radius generalInfo"></div>
+    {% if username is None %}
+    <div class="panel clearfix" id="logininfo">
+      <h5>Log In</h5>
+      <div id="invalidLogin" data-alert class="alert-box warning radius" style="display: none;">
+      </div>
+        <form id="loginForm">
+          <label>Username</label>
+          <input name="username" type="text" id="loginusername" />
+          <label>Password</label>
+          <input name="password" type="password" id="loginpassword" />
+          <div class="row right">
+          <div class="large-12 medium-12 columns">
+          <a href="#" data-reveal-id="signupModal" data-reveal class="alert small radius button">Sign Up</a>&nbsp;<input type="submit" class="success small radius button" id="loginButton" value="Login">
+          </div></div>
+        </form>
+    </div>
+    <div id="signupModal" class="reveal-modal tiny" data-reveal>
+      <h2>Sign Up</h2>
+        <div id="signupStatus" data-alert class="alert-box warning radius" style="display: none;">
+        </div>
+        <form id="signupForm" data-abide>
+          <label>Username</label>
+          <input name="username" type="text" pattern="alpha_numeric" id="signupusername" />
+          <label>Password</label>
+          <input name="password" type="password" id="signuppassword" />
+          <label>Email</label>
+          <input name="email" type="email" id="signupemail" />
+          <div class="row collapse">
+            <div class="large-12 medium-12 columns">
+      <input type="submit" class="success medium radius button expand" value="Create My Account">
+            </div>
+          </div>
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    {% else %}
+    <div id="accountInfo">
+    <div class="panel clearfix">
+      <h5>Account Info</h5>
+      <p><strong>Username</strong><br>{{ username }}</p>
+      <p><strong>Balance</strong><br><span id="clientBalance" data-bind="text: clientBalance"></span></p>
+      <p><a href="#" data-reveal-id="depositModal" data-reveal><strong>Deposit Address</strong></a></p>
+      <p><a href="#" data-reveal-id="withdrawModal" data-reveal><strong>Withdraw</strong></a></p>
+      <p><a href="#" data-reveal-id="seedsModal" data-reveal><strong>Seeds</strong></a></p>
+      <div class="row right"><div class="large-12 medium-12 columns">
+      <a href="/logout" class="alert small radius button">Logout</a></div></div>
+    </div>
+    <div id="depositModal" class="reveal-modal tiny" data-reveal>
+      <h2>Deposit</h2>
+        <label>Your Deposit Address</label>
+        <input id="depositAddress" type="text" value="{{ depositaddress }}" readonly />
+        <div data-alert class="alert-box radius">
+            Your balance will be updated and available after 2 confirmations.
+        </div>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    <div id="withdrawModal" class="reveal-modal tiny" data-reveal>
+      <h2>Withdraw</h2>
+        <div id="withdrawStatus" data-alert class="alert-box warning radius" style="display: none;">
+        </div>
+        <form id="withdrawForm">
+        {% module xsrf_form_html() %}
+          <p>Balance: <a data-bind="click: balanceWithdraw" href="#"><span data-bind="text: clientBalance"></span></a></p>
+          <label>Address</label>
+          <input name="address" type="text" id="withdrawAddress" />
+          <label>Amount</label>
+          <input name="amount" type="number" data-bind="value: withdrawAmount" id="withdrawAmount" step="any" min="0" />
+          <div class="row collapse">
+            <div class="large-12 medium-12 columns">
+      <input type="submit" class="success medium radius button expand" value="Withdraw">
+            </div>
+          </div>
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    </div>
+    <div id="seedsModal" class="reveal-modal tiny" data-reveal>
+      <h2>Seeds</h2>
+          <label>Your Server Seed Hash (SHA512)</label>
+          <input id="serverSeedHash" type="text" data-bind="value: serverSeedHash" readonly />
+          <label>Your Client Seed (You Can Edit It, Or Generate A New One)</label>
+          <input id="clientSeed" type="text" data-bind="value: clientSeed, valueUpdate: ['afterKeyDown', 'input']" />
+          <div class="row collapse">
+            <div class="large-12 medium-12 columns">
+              <button id="generateClientSeed" class="success medium radius button expand">Generate New Client Seed</button>
+            </div>
+          </div>
+        </form>
+        <a class="close-reveal-modal">&#215;</a>
+    </div>
+    {% end %}
+    <div id="siteStats" class="panel">
+      <h5>Site Info</h5>
+      <p><strong>ADN Wagered</strong><br><span data-bind="text: totalWagered"></span></p>
+      <p><strong>Total Bets</strong><br><span data-bind="text: totalBets"></span></p>
+      <p><strong>Provably Fair</strong><br><a href="/bets"><strong>Bet History</strong></a> | <a href="/verify"><strong>Verify Bets</strong></a></p>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="large-12 columns">
+    <h5>History</h5>
+    <table id="betHistory" width="100%">
+      <thead>
+        <tr>
+          <th width="10%">Bet #</th>
+          <th width="10%">User</th>
+          <th width="20%">Time (UTC)</th>
+          <th width="15%">Bet Amount</th>
+          <th width="10%">Payout</th>
+          <th width="10%">Game</th>
+          <th width="10%">Roll</th>
+          <th width="15%">Profit</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% end %}
+
+{% block footer_scripts %}
+<script src="{{ static_url("js/knockout-3.1.0.js") }}"></script>
+<script src="{{ static_url("js/uuid.js") }}"></script>
+<script>
+var houseEdge = {{ houseedge }};
+$(document).ready(function() {
+    $("#generalInfo").html("Provably Fair<br><br>House Edge: " + houseEdge +"%");    
+});
+</script>
+
+<script src="{{ static_url("js/dicescript.min.js") }}"></script>
+
+{% if username is not None %}
+<script src="{{ static_url("js/dicescriptloggedin.min.js") }}"></script>
+<script>
+setTimeout(requestServerVars("{{ username }}"), 100);
+</script>
+{% else %}
+<script>
+setTimeout(requestServerVars(), 100);
+</script>
+{% end %}
+
+{% if jscode is not None %}
+<script>
+{% raw jscode %}
+</script>
+{% end %}
+{% end %}

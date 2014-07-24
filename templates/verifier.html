@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}<title>AIDEN Dice - Provably Fair | #aiden on Freenode | Verify Bets</title>{% end %}
+
+{% block content %}
+<div class="row">
+  <div class="large-12 medium-12 columns">
+    <h5>Verifier</h5>
+    <p>This is entirely written in JavaScript, do look at the source if you have doubts. Verify your bets here once the server seed is released. The server seed changes every 24 hours, or whenever the server restarts.</p>
+    <p>You can now search for all previous bets via bet ID or username <a href="/bets">here</a>. Using the results, enter them into the form below to verify your results.</p>
+    <form id="verifyForm" data-abide>
+    <input id="gameType" type="hidden" value="" />
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <label>Server Seed</label>
+          <input type="text" data-bind="value: serverSeed" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <label>Client Seed</label>
+          <input type="text" data-bind="value: clientSeed" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <label>Bet ID</label>
+          <input type="number" data-bind="value: rollNumber" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <label>Server Seed Hash</label>
+          <input type="text" data-bind="value: serverSeedHash" readonly/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <label>Result</label>
+          <input type="text" data-bind="value: result" readonly/>
+        </div>
+      </div>
+      <div class="row collapse">
+        <div class="large-12 medium-12 columns">
+          <button id="rollUnder" class="medium radius button expand" data-bind="click: verifyResult">Verify Result</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% end %}
+
+{% block footer_scripts %}
+<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha512.js"></script>
+<script src="{{ static_url("js/knockout-3.1.0.js") }}"></script>
+<script src="{{ static_url("js/verifier.js") }}"></script>
+<script src="{{ static_url("js/mersenne-twister.js") }}"></script>
+{% end %}

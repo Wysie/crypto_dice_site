@@ -1,0 +1,28 @@
+/* Foundation was made by ZURB, an interaction design and design strategy firm in Campbell, CA */
+/* zurb.com */
+/* humanstxt.org */
+                    ______
+        .-------.  /\     \
+       /   o   /| /o \  o  \
+      /_______/o|/   o\_____\
+      | o     | |\o   /o    /
+      |   o   |o/ \ o/  o  /
+      |     o |/   \/____o/
+      '-------'
+
+/* SITE */
+  Standards: HTML5, CSS3
+  Components: jQuery, Orbit, Reveal
+  Software: Sublime, Git, Sass
+  
+/* TEAM */
+	Lead with no design skills: Shuxy
+	Contact: supercryptdotco@gmail.com
+	Twitter: @Supercryptdotco	
+
+/* SITE */
+    Last update:2014/04/09
+    Language: English
+    Standards: HTML5, CSS3
+    Components: jQuery, KnockoutJS, Foundation
+    Software: Sublime, Git, Python/Tornado, PostgreSQL

@@ -1,0 +1,41 @@
+drop table transactions;
+drop table bets;
+drop table users;
+drop table server_seeds;
+
+CREATE TABLE users (
+	username VARCHAR(64) PRIMARY KEY,
+	hashed_password CHAR(128) NOT NULL,
+	salt CHAR(32) NOT NULL,
+	email VARCHAR(255) UNIQUE NOT NULL,
+	wallet_address CHAR(34) UNIQUE NOT NULL);
+
+CREATE TABLE server_seeds (
+    server_seed CHAR(32) PRIMARY KEY,
+    hashed_server_seed CHAR(128) NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP);
+
+CREATE TABLE transactions (
+    transaction_id CHAR(64) PRIMARY KEY,
+    transaction_type VARCHAR(8) NOT NULL,
+    transaction_time TIMESTAMP NOT NULL,
+    username VARCHAR(64) NOT NULL,
+    amount REAL NOT NULL,
+    withdraw_address CHAR(34),
+    FOREIGN KEY(username) REFERENCES users(username));
+    
+CREATE TABLE bets (
+    bet_id SERIAL PRIMARY KEY,
+    username VARCHAR(64) NOT NULL,
+    bet_time TIMESTAMP NOT NULL,
+    bet_amount REAL NOT NULL,
+    payout REAL NOT NULL,
+    game VARCHAR(5) NOT NULL,
+    roll REAL NOT NULL,
+    profit REAL NOT NULL,
+    result VARCHAR(4) NOT NULL,
+    server_seed CHAR(32) NOT NULL,
+    client_seed CHAR(32) NOT NULL,
+    FOREIGN KEY(username) REFERENCES users(username),
+    FOREIGN KEY(server_seed) REFERENCES server_seeds(server_seed));

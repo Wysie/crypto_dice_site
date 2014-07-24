@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}<title>AIDEN Dice - Provably Fair | #aiden on Freenode | Bet History</title>{% end %}
+
+{% block head_scripts_styles %}
+<link rel="stylesheet" href="//datatables.github.com/Plugins/integration/foundation/dataTables.foundation.css">
+<style>
+#betSearchResults th {word-wrap:break-word; font-size: 70%;}
+#betSearchResults td {word-wrap:break-word; font-size: 70%;}
+</style>
+{% end %}
+
+{% block content %}
+<div class="row">
+  <div class="large-12 medium-12 columns">
+    <h5>Search</h5>
+    <p>This only displays results for which the server seed has been released (i.e. not currently in use). You can use the results found here and verify it against the <a href="/verify">verifier</a>.</p>
+    <p><em>Note: For bet IDs less than 250, there was a logic error when it comes to rolling over that caused the player to win even when he rolls a loss.</em></p>
+    <form id="betSearchForm">
+      <div class="row">
+        <div class="large-12 medium-12 columns">
+          <input type="text" name="q" id="q" placeholder="Enter a username or bet ID" />
+          <input type="submit" class="medium radius button expand" value="Search" />
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row">
+  <div class="large-12 columns">
+    <h5>Results</h5>
+    <table id="betSearchResults" style="table-layout: fixed; width: 100%">
+      <thead>
+        <tr>
+          <th>Bet #</th>
+          <th>User</th>
+          <th>Time (UTC)</th>
+          <th>Bet Amount</th>
+          <th>Payout</th>
+          <th>Game</th>
+          <th>Roll</th>
+          <th>Profit</th>
+          <th>Result</th>
+          <th>Server Seed</th>
+          <th>Client Seed</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% end %}
+
+{% block footer_scripts %}
+<script type="text/javascript" language="javascript" src="//ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="//datatables.github.com/Plugins/integration/foundation/dataTables.foundation.js"></script>
+<script src="{{ static_url("js/betsearch.min.js") }}"></script>
+
+{% if results is not None %}
+<script>
+    processResults({% raw results %});
+</script>
+{% end %}
+{% end %}

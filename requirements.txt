@@ -1,0 +1,9 @@
+APScheduler==2.1.2
+Momoko==1.1.2
+backports.ssl-match-hostname==3.4.0.2
+bitcoin-python==0.3
+psycopg2==2.5.2
+sockjs-tornado==1.0.0
+tornado==3.2
+torndb==0.2
+wsgiref==0.1.2
